@@ -9,7 +9,7 @@
 
 if myHero.charName ~= "Kassadin" then return end
 local autoupdate = true -- u can turn it off, if u don't want autoupdates
-local version = 0.01
+local version = 0.02
 
 -- Required Libs
 if FileExist(LIB_PATH .. "/SxOrbWalk.lua") then
@@ -246,6 +246,7 @@ function Clear()
 		if ((myHero.mana/myHero.maxMana)*100) >= MenuKassadin.clearlane.clearmana then
 			if MenuKassadin.clearlane.useQF then
 				CastQ(minion)
+				print("Update klappt")
 			end
 			if MenuKassadin.clearlane.useWF and GetDistance(minion, myHero) <= Wspell.range then
 				CastW(minion)
