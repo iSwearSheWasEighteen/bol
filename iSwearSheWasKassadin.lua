@@ -58,7 +58,6 @@ function OnLoad()
 	Menu()
 	DelayAction(function() CheckUpdate() end, 0.1)
 	print("<b><font color=\"#FF0000\">iSwearSheWasKassadin:</font></b> <font color=\"#FFFFFF\">Script is in alpha!</font>")
-
 end
 
 -- OnTick Function
@@ -90,7 +89,6 @@ function OnTick()
 	if (MenuKassadin.itemcfg.aSeraph and GetInventorySlotItem(3040) ~= nil) then
 		UseSeraphs()
 	end
-
 end
 
 -- Function GetTarget() cause integrate SAC:R
@@ -157,7 +155,6 @@ function Harrass()
 		CastQ(Cel)
 		CastE(Cel)
 	end
-	
 end
 
 -- Function Combo
@@ -354,7 +351,6 @@ function Menu()
 	-- Additional Settings. WIP
 	MenuKassadin.combocfg:permaShow("docombo")
 	MenuKassadin.harrascfg:permaShow("doharras")
-
 end
 
 -- Function OnDraw
