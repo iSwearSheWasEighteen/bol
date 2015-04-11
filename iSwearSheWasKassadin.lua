@@ -49,7 +49,7 @@ function CheckUpdate()
     end
 end
 function PrintMessage(message) 
-    print("<font color=\"#6699ff\"><b>" .. scriptName .. ":</b></font> <font color=\"#FFFFFF\">" .. message .. "</font>") 
+    print("<font color=\"#6699ff\"><b>" .. "iSwearSheWasKassadin" .. ":</b></font> <font color=\"#FFFFFF\">" .. message .. "</font>") 
 end
 
 
