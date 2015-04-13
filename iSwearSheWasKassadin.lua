@@ -9,7 +9,7 @@
 
 if myHero.charName ~= "Kassadin" then return end
 local autoupdate = true -- u can turn it off, if u don't want autoupdates
-local version = 0.02
+local version = 0.05
 
 -- Required Libs
 if FileExist(LIB_PATH .. "/SxOrbWalk.lua") then
