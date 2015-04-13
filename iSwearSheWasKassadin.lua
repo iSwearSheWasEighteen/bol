@@ -58,12 +58,12 @@ function OnTick()
 	SelectedTarged = TargetSelector.target
 	Check()
 	-- Combo
-	if Cel ~= nil and MenuKassadin.combocfg.docombo then
+	if opponent ~= nil and MenuKassadin.combocfg.docombo then
 		SxOrb:EnableAttacks()
 		Combo()
 	end
 	-- Harrass
-	if Cel ~= nil and MenuKassadin.harrascfg.doharras then
+	if opponent ~= nil and MenuKassadin.harrascfg.doharras then
 		Harrass()
 	end
 	-- LaneClear
@@ -94,12 +94,12 @@ end
 -- Function check
 function Check()
 	if SelectedTarget ~= nil and ValidTarget(SelectedTarget, Qspell.range) then
-		Cel = SelectedTarget
+		opponent = SelectedTarget
 	else 
-		Cel = GetTarget()
+		opponent = GetTarget()
 	end
 	if MenuKassadin.combocfg.force then
-		SxOrb:ForceTarget(Cel)
+		SxOrb:ForceTarget(opponent)
 	end
 end
 
@@ -135,6 +135,7 @@ function CastR(unit)
 				CastSpell(_R, Position.x, Position.z)
 				-- CastW directly
 				CastSpell(_W)
+				myHero:Attack(unit)
 		end
 	end
 end
@@ -142,14 +143,14 @@ end
 -- Function Harras Enemy
 function Harrass()
 	if MenuKassadin.harrascfg.HMode == 1 and ((myHero.mana/myHero.maxMana)*100) >= MenuKassadin.harrascfg.harrasmana then
-		CastQ(Cel)
+		CastQ(opponent)
 	end
 	if MenuKassadin.harrascfg.HMode == 2 and ((myHero.mana/myHero.maxMana)*100) >= MenuKassadin.harrascfg.harrasmana then
-		CastE(Cel)
+		CastE(opponent)
 	end
 	if MenuKassadin.harrascfg.HMode == 3 and ((myHero.mana/myHero.maxMana)*100) >= MenuKassadin.harrascfg.harrasmana then
-		CastQ(Cel)
-		CastE(Cel)
+		CastQ(opponent)
+		CastE(opponent)
 	end
 end
 
@@ -157,17 +158,17 @@ end
 function Combo()
 	if myHero.dead then return end
 	if MenuKassadin.combocfg.useR and Rspell.Ready() then
-		CastR(Cel)
+		CastR(opponent)
 	end
 	if MenuKassadin.combocfg.useW and Wspell.Ready() then
-		CastW(Cel)
-		SxOrb:ForceTarget(Cel)
+		CastW(opponent)
+		SxOrb:ForceTarget(opponent)
 	end
 	if MenuKassadin.combocfg.useE and Espell.Ready() then
-		CastE(Cel)
+		CastE(opponent)
 	end 
 	if MenuKassadin.combocfg.useQ and Qspell.Ready() then
-		CastQ(Cel)
+		CastQ(opponent)
 	end
 end
 
