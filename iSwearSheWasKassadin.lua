@@ -1,15 +1,8 @@
---[[
-
-	Script Name: iSwearSheWasKassadin
-	Author: iSwearSheWas18
-	Current Version: 0.05
-	11.04.2015
-
-]]--
+--[[ Script Name: iSwearSheWasKassadin ]]--
 
 if myHero.charName ~= "Kassadin" then return end
 local autoupdate = true -- u can turn it off, if u don't want autoupdates
-local version = 0.05
+local version = 0.01
 
 -- Required Libs
 if FileExist(LIB_PATH .. "/SxOrbWalk.lua") then
@@ -30,7 +23,6 @@ local Melee = 150
 local enemyMinions = minionManager(MINION_ENEMY, Qspell.range, myHero, MINION_SORT_MAXHEALTH_DEC)
 
 -- CheckUpdate by Aroc
-
 function CheckUpdate()
     if autoupdate then
         local scriptName = "iSwearSheWasKassadin"
@@ -48,16 +40,17 @@ function CheckUpdate()
         ScriptUpdate(ToUpdate.Version, ToUpdate.UseHttps, ToUpdate.Host, ToUpdate.VersionPath, ToUpdate.ScriptPath, ToUpdate.SavePath, ToUpdate.CallbackUpdate,ToUpdate.CallbackNoUpdate, ToUpdate.CallbackNewVersion,ToUpdate.CallbackError)
     end
 end
+
+-- Update Message
 function PrintMessage(message) 
     print("<font color=\"#6699ff\"><b>" .. "iSwearSheWasKassadin" .. ":</b></font> <font color=\"#FFFFFF\">" .. message .. "</font>") 
 end
-
 
 -- OnLoad Function
 function OnLoad()
 	Menu()
 	DelayAction(function() CheckUpdate() end, 0.1)
-	print("<b><font color=\"#FF0000\">iSwearSheWasKassadin:</font></b> <font color=\"#FFFFFF\">Script is in alpha!</font>")
+	print("<b><font color=\"#FF0000\">iSwearSheWasKassadin:</font></b> <font color=\"#FFFFFF\">Enjoy guys!</font>")
 end
 
 -- OnTick Function
@@ -105,7 +98,9 @@ function Check()
 	else 
 		Cel = GetTarget()
 	end
-	SxOrb:ForceTarget(Cel)
+	if MenuKassadin.combocfg.force then
+		SxOrb:ForceTarget(Cel)
+	end
 end
 
 -- Function CastQ 
@@ -131,6 +126,7 @@ function CastE(unit)
 		end
 	end 
 end
+
 -- Function CastR
 function CastR(unit)
 	if Rspell.Ready() and ValidTarget(unit, Rspell.range) then
@@ -175,15 +171,6 @@ function Combo()
 	end
 end
 
---[[ Enable or Disable Autoattacks
-function doAA()
-		if MenuKassadin.combocfg.useAA then
-			SxOrb:EnableAttacks()
-		elseif not MenuKassadin.combocfg.useAA then
-			SxOrb:DisableAttacks()
-		end
-end --]]
-
 -- Function Auto Zhonyas
 function UseZhonyas()
 	local Slot = GetInventorySlotItem(3157)
@@ -215,14 +202,12 @@ function UseIgnite()
 					if myHero.level >= 6 then
 						if CheckIgniteOverkill(enemy) then
 							CastSpell(Ignite, enemy)
-						print("check hat funktioniert")
 						end
 					else
 						CastSpell(Ignite, enemy)
 					end
 				else
 					CastSpell(Ignite, enemy)
-					--print("du bist im else")
 				end
 			end
 		end
@@ -230,7 +215,6 @@ function UseIgnite()
 end
 
 -- IgniteOverkill
-
 function CheckIgniteOverkill(unit)
 	if (GetDistance(unit, myHero) >= (Qspell.range-100) and not Rspell.Ready() and not Qspell.Ready() and not Espell.Ready()) then
 		return true
@@ -243,18 +227,20 @@ end
 function Clear()
 	enemyMinions:update()
 	for j, minion in pairs(enemyMinions.objects) do
+		local myQdmg = (70+(myHero:GetSpellData(_Q).level*25-25)+myHero.ap*0.7)
+		local myWdmg = (40+(myHero:GetSpellData(_W).level*25-25)+myHero.ap*0.6)
+		local myEdmg = (80+(myHero:GetSpellData(_E).level*25-25)+myHero.ap*0.7)
 		if ((myHero.mana/myHero.maxMana)*100) >= MenuKassadin.clearlane.clearmana then
-			if MenuKassadin.clearlane.useQF then
+			if MenuKassadin.clearlane.useQF and (minion.health <= myQdmg) then
 				CastQ(minion)
-				print("Update klappt")
 			end
-			if MenuKassadin.clearlane.useWF and GetDistance(minion, myHero) <= Wspell.range then
+			if MenuKassadin.clearlane.useWF and GetDistance(minion, myHero) <= Wspell.range and (minion.health <= myWdmg) then
 				CastW(minion)
-				SxOrb:ForceTarget(minion)
+				myHero:Attack(minion)
 			end
 			if MenuKassadin.clearlane.useEF then
 				mainCastPosition, mainHitChance, maxHit = VP:GetConeAOECastPosition(minion, Espell.delay, Espell.angle, Espell.range, Espell.speed, myHero)
-				if maxHit >=1 and mainHitChance >=0 then
+				if maxHit >=1 and mainHitChance >=0 and (minion.health <= myEdmg) then
 					CastSpell(_E, mainCastPosition.x, mainCastPosition.z)
 				end
 			end
@@ -262,117 +248,104 @@ function Clear()
 	end
 end
 
---[[ Function TowerdiveManager for R
-function TowerDive()
-	if Rspell.Ready() then
-		for _, turret in pairs(GetTurrets()) do
-			if turret ~= nil then
-				if GetDistance(turret.object, myHero.pos) <= (Rspell.range+950) then
-					if  MenuKassadin.extracfg.tdive then
-						if ((myHero.health/myHero.maxHealth)*100) >= MenuKassadin.extracfg.tdivelife then
-							print("Es funktioniert")
-							return true
-						else
-							print("haha2")
-							return false
-						end
-					end
-				elseif GetDistance(turret.object, myHero.pos) > (Rspell.range+950) then
-					print(GetDistance(turret.object, myHero.pos))
-					return true
-				end
-			end
-		end
+-- Function JungleClear()
+function JungleClear()
+	jungleMinions:update()
+	for j, minion in pairs(jungleMinions.objects) do
+		
 	end
-end --]]
+end
 
 -- Ingame Menu
 function Menu()
 	MenuKassadin = scriptConfig("iSwearSheWasKassadin "..version, "iSwearSheWasKassadin "..version)
-	MenuKassadin:addSubMenu("[Kassadin]: Orbwalking", "Orbwalking")
-		SxOrb:LoadToMenu(MenuKassadin.Orbwalking)
-	TargetSelector = TargetSelector(TARGET_LOW_HP_PRIORITY, Qspell.range, DAMAGE_MAGIC)
-	TargetSelector.name = "Kassadin"
-	MenuKassadin:addTS(TargetSelector)
-	MenuKassadin:addSubMenu("[Kassadin]: Combo Settings", "combocfg")
-	MenuKassadin.combocfg:addParam("useQ", "Use " .. Qspell.name .. "(Q)", SCRIPT_PARAM_ONOFF, true)
-	MenuKassadin.combocfg:addParam("qqq", "--------------------------------------------------------", SCRIPT_PARAM_INFO,"")
-	MenuKassadin.combocfg:addParam("useW", "Use " .. Wspell.name .. "(W)", SCRIPT_PARAM_ONOFF, true)
-	MenuKassadin.combocfg:addParam("qqq", "--------------------------------------------------------", SCRIPT_PARAM_INFO,"")
-	MenuKassadin.combocfg:addParam("useE", "Use " .. Espell.name .. "(E)", SCRIPT_PARAM_ONOFF, true)
-	MenuKassadin.combocfg:addParam("qqq", "--------------------------------------------------------", SCRIPT_PARAM_INFO,"")
-	MenuKassadin.combocfg:addParam("useR", "Use " .. Rspell.name .. "(R)", SCRIPT_PARAM_ONOFF, true)
-	MenuKassadin.combocfg:addParam("qqq", "--------------------------------------------------------", SCRIPT_PARAM_INFO,"")
-	MenuKassadin.combocfg:addParam("useAA", "Use Auto Attacks in Combo", SCRIPT_PARAM_ONOFF, true)
-	MenuKassadin.combocfg:addParam("qqq", "--------------------------------------------------------", SCRIPT_PARAM_INFO,"")
-	MenuKassadin.combocfg:addParam("docombo", "Full Combo", SCRIPT_PARAM_ONKEYDOWN, false, 32)
+		MenuKassadin:addSubMenu("[Kassadin]: Orbwalking", "Orbwalking")
+			SxOrb:LoadToMenu(MenuKassadin.Orbwalking)
+		TargetSelector = TargetSelector(TARGET_LOW_HP_PRIORITY, Qspell.range, DAMAGE_MAGIC)
+		TargetSelector.name = "Kassadin"
+		MenuKassadin:addTS(TargetSelector)
 
-	MenuKassadin:addSubMenu("[Kassadin]: Harras Settings", "harrascfg")
-	MenuKassadin.harrascfg:addParam("harrasmana", "Min. MP% To Harass", SCRIPT_PARAM_SLICE, 30, 0, 100, 0)
-	MenuKassadin.harrascfg:addParam("HMode", "Harras Mode:", SCRIPT_PARAM_LIST, 3, {"|Q|", "|E|", "|QE|"})
-	MenuKassadin.harrascfg:addParam("doharras", "Harras", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("T"))
+		MenuKassadin:addSubMenu("[Kassadin]: Combo Settings", "combocfg")
+			MenuKassadin.combocfg:addParam("useQ", "Use " .. Qspell.name .. "(Q)", SCRIPT_PARAM_ONOFF, true)
+			MenuKassadin.combocfg:addParam("qqq", "--------------------------------------------------------", SCRIPT_PARAM_INFO,"")
+			MenuKassadin.combocfg:addParam("useW", "Use " .. Wspell.name .. "(W)", SCRIPT_PARAM_ONOFF, true)
+			MenuKassadin.combocfg:addParam("qqq", "--------------------------------------------------------", SCRIPT_PARAM_INFO,"")
+			MenuKassadin.combocfg:addParam("useE", "Use " .. Espell.name .. "(E)", SCRIPT_PARAM_ONOFF, true)
+			MenuKassadin.combocfg:addParam("qqq", "--------------------------------------------------------", SCRIPT_PARAM_INFO,"")
+			MenuKassadin.combocfg:addParam("useR", "Use " .. Rspell.name .. "(R)", SCRIPT_PARAM_ONOFF, true)
+			MenuKassadin.combocfg:addParam("qqq", "--------------------------------------------------------", SCRIPT_PARAM_INFO,"")
+			MenuKassadin.combocfg:addParam("force", "Force to attack the target with AA", SCRIPT_PARAM_ONOFF, true)
+			MenuKassadin.combocfg:addParam("qqq", "--------------------------------------------------------", SCRIPT_PARAM_INFO,"")
+			MenuKassadin.combocfg:addParam("docombo", "Full Combo", SCRIPT_PARAM_ONKEYDOWN, false, 32)
 
-	MenuKassadin:addSubMenu("[Kassadin]: LaneClear Settings", "clearlane")
-	MenuKassadin.clearlane:addParam("useQF", "Use " .. Qspell.name .. "(Q)", SCRIPT_PARAM_ONOFF, true)
-	MenuKassadin.clearlane:addParam("qqq", "--------------------------------------------------------", SCRIPT_PARAM_INFO,"")
-	MenuKassadin.clearlane:addParam("useWF", "Use " .. Wspell.name .. "(W)", SCRIPT_PARAM_ONOFF, true)
-	MenuKassadin.clearlane:addParam("qqq", "--------------------------------------------------------", SCRIPT_PARAM_INFO,"")
-	MenuKassadin.clearlane:addParam("useEF", "Use " .. Espell.name .. "(E)", SCRIPT_PARAM_ONOFF, true)
-	MenuKassadin.clearlane:addParam("qqq", "--------------------------------------------------------", SCRIPT_PARAM_INFO,"")
-	MenuKassadin.clearlane:addParam("clearmana", "Min. Mana to LaneClear", SCRIPT_PARAM_SLICE, 30, 0, 100, 0)
-	MenuKassadin.clearlane:addParam("qqq", "--------------------------------------------------------", SCRIPT_PARAM_INFO,"")
-	MenuKassadin.clearlane:addParam("dolaneclear", "Lane Clear", SCRIPT_PARAM_ONKEYDOWN, false,   string.byte("V"))
+		MenuKassadin:addSubMenu("[Kassadin]: Harras Settings", "harrascfg")
+			MenuKassadin.harrascfg:addParam("harrasmana", "Min. MP% To Harass", SCRIPT_PARAM_SLICE, 30, 0, 100, 0)
+			MenuKassadin.harrascfg:addParam("HMode", "Harras Mode:", SCRIPT_PARAM_LIST, 3, {"|Q|", "|E|", "|QE|"})
+			MenuKassadin.harrascfg:addParam("doharras", "Harras", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("T"))
 
-	MenuKassadin:addSubMenu("[Kassadin]: Draw Settings", "drawcfg")
-	MenuKassadin.drawcfg:addParam("qDraw", "Draw Q", SCRIPT_PARAM_ONOFF, true)
-	MenuKassadin.drawcfg:addParam("eDraw", "Draw E", SCRIPT_PARAM_ONOFF, true)
-	MenuKassadin.drawcfg:addParam("rDraw", "Draw R", SCRIPT_PARAM_ONOFF, true)
-	MenuKassadin.drawcfg:addParam("eReady", "E Ready", SCRIPT_PARAM_ONOFF, true)
+		MenuKassadin:addSubMenu("[Kassadin]: LaneClear Settings", "clearlane")
+			MenuKassadin.clearlane:addParam("useQF", "Use " .. Qspell.name .. "(Q)", SCRIPT_PARAM_ONOFF, true)
+			MenuKassadin.clearlane:addParam("qqq", "--------------------------------------------------------", SCRIPT_PARAM_INFO,"")
+			MenuKassadin.clearlane:addParam("useWF", "Use " .. Wspell.name .. "(W)", SCRIPT_PARAM_ONOFF, true)
+			MenuKassadin.clearlane:addParam("qqq", "--------------------------------------------------------", SCRIPT_PARAM_INFO,"")
+			MenuKassadin.clearlane:addParam("useEF", "Use " .. Espell.name .. "(E)", SCRIPT_PARAM_ONOFF, true)
+			MenuKassadin.clearlane:addParam("qqq", "--------------------------------------------------------", SCRIPT_PARAM_INFO,"")
+			MenuKassadin.clearlane:addParam("clearmana", "Min. Mana to LaneClear", SCRIPT_PARAM_SLICE, 30, 0, 100, 0)
+			MenuKassadin.clearlane:addParam("qqq", "--------------------------------------------------------", SCRIPT_PARAM_INFO,"")
+			MenuKassadin.clearlane:addParam("dolaneclear", "Lane Clear", SCRIPT_PARAM_ONKEYDOWN, false,   string.byte("V"))
 
-	MenuKassadin:addSubMenu("[Kassadin]: Items/Summoners", "itemcfg")
-	MenuKassadin.itemcfg:addParam("aZhon", "Use Auto Zhonya's", SCRIPT_PARAM_ONOFF, true)
-	MenuKassadin.itemcfg:addParam("aZhonlife", "Use Zhonya's under % health", SCRIPT_PARAM_SLICE, 30, 0, 100, 0)
-	MenuKassadin.itemcfg:addParam("aSeraph", "Use Auto Seraph's", SCRIPT_PARAM_ONOFF, true)
-	MenuKassadin.itemcfg:addParam("aSeraphlife", "Use Seraph's under % health", SCRIPT_PARAM_SLICE, 30, 0, 100,0)
+		MenuKassadin:addSubMenu("[Kassadin]: Draw Settings", "drawcfg")
+			MenuKassadin.drawcfg:addParam("qDraw", "Draw Q", SCRIPT_PARAM_ONOFF, true)
+			MenuKassadin.drawcfg:addParam("eDraw", "Draw E", SCRIPT_PARAM_ONOFF, true)
+			MenuKassadin.drawcfg:addParam("rDraw", "Draw R", SCRIPT_PARAM_ONOFF, true)
+			MenuKassadin.drawcfg:addParam("eReady", "E Ready Notification", SCRIPT_PARAM_ONOFF, true)
 
-	MenuKassadin:addSubMenu("[Kassadin]: Extras", "extracfg")
-	--[[MenuKassadin.extracfg:addParam("tdive", "Towerdive", SCRIPT_PARAM_ONOFF, true)
-	MenuKassadin.extracfg:addParam("tdivelife", "Don't Towerdive if % health under", SCRIPT_PARAM_SLICE, 15, 0, 100, 0)--]]
-		-- Ignite
-		if myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") then
-			Ignite = SUMMONER_1
-		elseif	myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then
-			Ignite = SUMMONER_2
-		end
-	if Ignite ~= nil then
-	MenuKassadin.itemcfg:addParam("aIgnite", "Use Auto Ignite", SCRIPT_PARAM_ONOFF, true)
-	MenuKassadin.itemcfg:addParam("IgniteOverkill", "Avoid Ignite Overkill", SCRIPT_PARAM_ONOFF, true)
-	end
-	-- Additional Settings. WIP
-	MenuKassadin.combocfg:permaShow("docombo")
-	MenuKassadin.harrascfg:permaShow("doharras")
+		MenuKassadin:addSubMenu("[Kassadin]: Items/Summoners", "itemcfg")
+			MenuKassadin.itemcfg:addParam("aZhon", "Use Auto Zhonya's", SCRIPT_PARAM_ONOFF, true)
+			MenuKassadin.itemcfg:addParam("aZhonlife", "Use Zhonya's under % health", SCRIPT_PARAM_SLICE, 30, 0, 100, 0)
+			MenuKassadin.itemcfg:addParam("aSeraph", "Use Auto Seraph's", SCRIPT_PARAM_ONOFF, true)
+			MenuKassadin.itemcfg:addParam("aSeraphlife", "Use Seraph's under % health", SCRIPT_PARAM_SLICE, 30, 0, 100,0)
+
+		MenuKassadin:addSubMenu("[Kassadin]: Extras", "extracfg")
+			MenuKassadin.extracfg:addParam("qqq", "WIP", SCRIPT_PARAM_INFO,"")
+
+			-- Find Ignite
+			if myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") then
+				Ignite = SUMMONER_1
+			elseif	myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then
+				Ignite = SUMMONER_2
+			end
+			if Ignite ~= nil then
+				MenuKassadin.itemcfg:addParam("aIgnite", "Use Auto Ignite", SCRIPT_PARAM_ONOFF, true)
+				MenuKassadin.itemcfg:addParam("IgniteOverkill", "Avoid Ignite Overkill", SCRIPT_PARAM_ONOFF, true)
+			end
+
+		-- Display Active Button
+		MenuKassadin.combocfg:permaShow("docombo")
+		MenuKassadin.harrascfg:permaShow("doharras")
+		MenuKassadin.clearlane:permaShow("dolaneclear")
 end
 
 -- Function OnDraw
 function OnDraw()
 	if myHero.dead then return end
 		if MenuKassadin.drawcfg.qDraw and Qspell.Ready() then
-			DrawCircle(myHero.x, myHero.y, myHero.z, Qspell.range, 0x191970)
+			DrawCircle(myHero.x, myHero.y, myHero.z, Qspell.range, ARGB(255,0,0,255))
 		end
 		if MenuKassadin.drawcfg.eDraw and Espell.Ready() then
-			DrawCircle(myHero.x, myHero.y, myHero.z, Espell.range, 0x191970)
+			DrawCircle(myHero.x, myHero.y, myHero.z, Espell.range, ARGB(255,0,0,255))
 		end
 		if MenuKassadin.drawcfg.rDraw and Rspell.Ready() then
-			DrawCircle(myHero.x, myHero.y, myHero.z, Rspell.range, 0x191970)
+			DrawCircle(myHero.x, myHero.y, myHero.z, Rspell.range, ARGB(255,0,0,255))
 		end
 		-- Annonce when E is ready for cast
 		if MenuKassadin.drawcfg.eReady and Espell.Ready() then
-		DrawText("Force Pulse available!", 18, 100, 100, ARGB(255,255,204,0))
+			local heroPos = WorldToScreen(D3DXVECTOR3(myHero.x, myHero.y, myHero.z))
+			local xPos = heroPos.x-20
+			local yPos = heroPos.y-35
+			DrawText("Force Pulse available!", 20, xPos, yPos, ARGB(255,255,204,0))
 		end
 end
-
-
-
 
 ------------------Class Scriptupdate------------------
 --[[
