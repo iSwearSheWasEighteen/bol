@@ -2,7 +2,7 @@
 
 	Script Name: iSwearSheWasKassadin
 	Author: iSwearSheWas18
-	Current Version: 0.01
+	Current Version: 0.05
 	11.04.2015
 
 ]]--
