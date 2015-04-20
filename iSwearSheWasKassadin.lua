@@ -1,7 +1,7 @@
 --[[ Script Name: iSwearSheWasKassadin ]]--
 
 if myHero.charName ~= "Kassadin" then return end
-local autoupdate = false -- u can turn it off, if u don't want autoupdates
+local autoupdate = true -- u can turn it off, if u don't want autoupdates
 local version = 0.02
 
 -- Required Libs
