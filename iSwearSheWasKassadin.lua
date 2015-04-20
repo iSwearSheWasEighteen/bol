@@ -25,6 +25,7 @@ local Ignite = nil
 local Melee = 150
 local attackdmg = 0
 local enemyMinions = minionManager(MINION_ENEMY, Qspell.range, myHero, MINION_SORT_MAXHEALTH_DEC)
+local jungleMinions =  minionManager(MINION_JUNGLE, Qspell.range, myHero, MINION_SORT_MAXHEALTH_DEC)
 local sacrLoaded,sacrinjected = false, false
 local maxRiftWalk = 4
 
@@ -95,6 +96,10 @@ function OnTick()
 	if MenuKassadin.clearlane.dolaneclear then
 		Clear()
 	end
+    -- JungleClear
+    if MenuKassadin.clearjungle.dojungleclear then
+        JungleClear()
+    end
 	--ignite
 	if Ignite ~= nil and MenuKassadin.itemcfg.aIgnite then
 		UseIgnite()
@@ -433,7 +438,7 @@ function Menu()
 			MenuKassadin.clearlane:addParam("qqq", "--------------------------------------------------------", SCRIPT_PARAM_INFO,"")
 			MenuKassadin.clearlane:addParam("dolaneclear", "Lane Clear", SCRIPT_PARAM_ONKEYDOWN, false,   string.byte("V"))
 
-        MenuKassadin:addSubMenu("[Kassadin]: JungleClear Settings", "clearlane")
+        MenuKassadin:addSubMenu("[Kassadin]: JungleClear Settings", "clearjungle")
 			MenuKassadin.clearjungle:addParam("jungleQF", "Use " .. Qspell.name .. "(Q)", SCRIPT_PARAM_ONOFF, true)
 			MenuKassadin.clearjungle:addParam("qqq", "--------------------------------------------------------", SCRIPT_PARAM_INFO,"")
 			MenuKassadin.clearjungle:addParam("jungleWF", "Use " .. Wspell.name .. "(W)", SCRIPT_PARAM_ONOFF, false)
