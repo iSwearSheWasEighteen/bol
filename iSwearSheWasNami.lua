@@ -45,7 +45,7 @@ if FileExist(LIB_PATH .. "/HPrediction.lua") then
 end
 -------------------------------------------------------------GLOBALS-----------------------------------------------------------------------
 
-local autoupdate = false -- u can turn it off, if u don't want autoupdates
+local autoupdate = true -- u can turn it off, if u don't want autoupdates
 local version = 0.1
 
 local Qspell = {name = "Aqua Prison", range = 875, delay = 0.875, radius = 162, Ready = function() return myHero:CanUseSpell(_Q) == READY end, mana = 0}
