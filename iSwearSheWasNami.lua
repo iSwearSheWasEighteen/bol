@@ -48,7 +48,7 @@ end
 local autoupdate = true -- u can turn it off, if u don't want autoupdates
 local version = 0.1
 
-local Qspell = {name = "Aqua Prison", range = 875, delay = 0.875, radius = 162, Ready = function() return myHero:CanUseSpell(_Q) == READY end, mana = 0}
+local Qspell = {name = "Aqua Prison", range = 875, delay = 0.875, radius = 162, speed = 1000, Ready = function() return myHero:CanUseSpell(_Q) == READY end, mana = 0}
 local Wspell = {name = "Ebb and Flow", range = 725, Ready = function() return myHero:CanUseSpell(_W) == READY end, mana = 0}
 local Espell = {name = "Tidecaller's Blessing", range = 800, Ready = function() return myHero:CanUseSpell(_E) == READY end, mana = 0}
 local Rspell = {name = "Tidal Wave", range = 2750, speed = 859, delay = 0.25, width=562, Ready = function() return myHero:CanUseSpell(_R) == READY end, mana = 0}
@@ -240,7 +240,7 @@ end
 
 -- Function HpredSkillshots()
 function HPredSkillShots()
-    HP_Q = HPSkillshot({type = "PromptCircle", delay = Qspell.delay, range = Qspell.range, radius = Qspell.radius, speed = 1200})
+    HP_Q = HPSkillshot({type = "PromptCircle", delay = Qspell.delay, range = Qspell.range, radius = Qspell.radius, speed = Qspell.speed})
     HP_R = HPSkillshot({type = "DelayLine", delay = Rspell.delay, range = Rspell.range, speed = Rspell.speed, width = Rspell.width, collisionM = false, collisionH = false})
 end
 
